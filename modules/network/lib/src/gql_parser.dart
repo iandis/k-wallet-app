@@ -16,8 +16,8 @@ abstract class GQLParser<T> {
   @alwaysThrows
   Never onError(OperationException exception) {
     log(
-      '[$runtimeType] Unhandled exception.',
-      name: 'GQLParser',
+      'Unhandled exception.',
+      name: runtimeType.toString(),
       error: exception,
     );
     throw exception;
