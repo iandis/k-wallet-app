@@ -1,13 +1,14 @@
 name: network
 description: Module for core network functionalities.
 version: 1.0.0
-publish_to: 'none'
+publish_to: "none"
 
 environment:
-  sdk: '>=2.14.4 <3.0.0'
+  sdk: ">=2.14.4 <3.0.0"
 
 dependencies:
   graphql: ^5.0.0
+  http: ^0.13.4
   meta: ^1.7.0
 
 dev_dependencies:
