@@ -1,4 +1,5 @@
 import 'package:graphql/client.dart';
+import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
 import 'gql_auth.dart';
@@ -12,8 +13,15 @@ abstract class GQLClient {
   String get baseUrl;
   GQLAuth get auth;
 
-  Future<QueryResult> query(QueryOptions options);
-  Future<QueryResult> mutate(MutationOptions options);
+  Future<QueryResult> query(
+    QueryOptions options, {
+    http.Client? httpClient,
+  });
+
+  Future<QueryResult> mutate(
+    MutationOptions options, {
+    http.Client? httpClient,
+  });
 }
 
 class _GQLClientImpl implements GQLClient {
@@ -26,32 +34,67 @@ class _GQLClientImpl implements GQLClient {
 
   @override
   final String baseUrl;
+
   @override
   final GQLAuth auth;
 
   @protected
-  late final GraphQLClient graphQLClient;
+  late final GraphQLClient _graphQLClient;
+
+  late final AuthLink _authLink;
+
+  late final GraphQLCache _graphQLCache;
 
   @protected
   void initClient() {
+    _authLink = AuthLink(getToken: auth.getToken);
     final HttpLink httpLink = HttpLink(baseUrl);
-    final AuthLink authLink = AuthLink(getToken: auth.getToken);
 
-    final Link link = authLink.concat(httpLink);
+    final Link link = _authLink.concat(httpLink);
 
-    graphQLClient = GraphQLClient(
+    _graphQLCache = GraphQLCache();
+
+    _graphQLClient = GraphQLClient(
       link: link,
-      cache: GraphQLCache(),
+      cache: _graphQLCache,
+    );
+  }
+
+  GraphQLClient _createClient(http.Client httpClient) {
+    final HttpLink httpLink = HttpLink(
+      baseUrl,
+      httpClient: httpClient,
+    );
+
+    final Link link = _authLink.concat(httpLink);
+
+    return GraphQLClient(
+      link: link,
+      cache: _graphQLCache,
     );
   }
 
   @override
-  Future<QueryResult> mutate(MutationOptions options) {
+  Future<QueryResult> mutate(
+    MutationOptions options, {
+    http.Client? httpClient,
+  }) {
+    GraphQLClient graphQLClient = _graphQLClient;
+    if (httpClient != null) {
+      graphQLClient = _createClient(httpClient);
+    }
     return graphQLClient.mutate(options);
   }
 
   @override
-  Future<QueryResult> query(QueryOptions options) {
+  Future<QueryResult> query(
+    QueryOptions options, {
+    http.Client? httpClient,
+  }) {
+    GraphQLClient graphQLClient = _graphQLClient;
+    if (httpClient != null) {
+      graphQLClient = _createClient(httpClient);
+    }
     return graphQLClient.query(options);
   }
 }
