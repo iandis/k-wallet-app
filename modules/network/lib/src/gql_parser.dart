@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 
 import 'gql_type.dart';
@@ -14,7 +13,7 @@ abstract class GQLParser<T> {
   bool get alwaysFetch => false;
 
   @alwaysThrows
-  Never onError(OperationException exception) {
+  Never onError(Exception exception) {
     log(
       'Unhandled exception.',
       name: runtimeType.toString(),
