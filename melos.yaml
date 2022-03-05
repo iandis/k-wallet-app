@@ -1,0 +1,23 @@
+name: kwallet
+
+packages:
+  - modules/**
+  - modules/repositories/**
+  - "*"
+
+scripts:
+  build-runner:
+    run: melos exec -- flutter pub run build_runner build --delete-conflicting-outputs
+    description: Run build runner
+
+  pub-get:
+    run: melos exec -- flutter pub get
+    description: Get all packages' dependencies
+
+  analyze:
+    run: melos exec -- flutter analyze .
+    description: Analyze all packages
+
+  test:
+    run: melos exec --dir-exists="test" -- flutter test --coverage
+    description: Run all tests with coverage
